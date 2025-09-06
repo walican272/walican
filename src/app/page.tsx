@@ -1,103 +1,148 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { Plus, ArrowRight, Wallet, LogIn, UserPlus } from 'lucide-react'
+import { useAuth } from '@/components/auth/auth-provider'
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const router = useRouter()
+  const { user } = useAuth()
+  const [existingUrl, setExistingUrl] = useState('')
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleCreateEvent = () => {
+    router.push('/events/new')
+  }
+
+  const handleJoinEvent = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (existingUrl) {
+      const url = existingUrl.replace(/^https?:\/\/[^\/]+\/events\//, '')
+      router.push(`/events/${url}`)
+    }
+  }
+
+  return (
+    <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
+      {/* Navigation */}
+      <div className="absolute top-0 left-0 right-0 p-4">
+        <div className="container flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Wallet className="h-6 w-6 text-primary" />
+            <span className="font-semibold">Walican</span>
+          </div>
+          {!user && (
+            <div className="flex gap-2">
+              <Link href="/auth/login">
+                <Button variant="ghost" size="sm">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  ログイン
+                </Button>
+              </Link>
+              <Link href="/auth/register">
+                <Button size="sm">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  新規登録
+                </Button>
+              </Link>
+            </div>
+          )}
+          {user && (
+            <Link href="/dashboard">
+              <Button size="sm">
+                ダッシュボード
+              </Button>
+            </Link>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      </div>
+
+      <div className="mb-8 text-center">
+        <div className="mb-4 flex justify-center">
+          <Wallet className="h-16 w-16 text-primary" />
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight">Walican</h1>
+        <p className="mt-2 text-muted-foreground">かんたん割り勘管理</p>
+        {user && (
+          <Badge variant="secondary" className="mt-2">
+            {user.email} でログイン中
+          </Badge>
+        )}
+      </div>
+
+      <div className="w-full max-w-md space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>新しいイベントを作成</CardTitle>
+            <CardDescription>
+              旅行や飲み会など、新しい割り勘イベントを始めましょう
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleCreateEvent} className="w-full" size="lg">
+              <Plus className="mr-2 h-5 w-5" />
+              イベントを作成
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>既存のイベントに参加</CardTitle>
+            <CardDescription>共有されたURLまたはコードを入力してください</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleJoinEvent} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="event-url">イベントURL / コード</Label>
+                <Input
+                  id="event-url"
+                  type="text"
+                  placeholder="URLまたはイベントコードを入力"
+                  value={existingUrl}
+                  onChange={(e) => setExistingUrl(e.target.value)}
+                />
+              </div>
+              <Button type="submit" className="w-full" variant="outline" disabled={!existingUrl}>
+                <ArrowRight className="mr-2 h-5 w-5" />
+                イベントに参加
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {!user && (
+          <Card className="border-dashed">
+            <CardHeader>
+              <CardTitle className="text-lg">もっと便利に使う</CardTitle>
+              <CardDescription>
+                アカウントを作成すると、複数のイベントを管理したり、
+                履歴を永続的に保存できます
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Link href="/auth/register" className="block">
+                <Button variant="outline" className="w-full">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  無料でアカウント作成
+                </Button>
+              </Link>
+              <p className="text-center text-xs text-muted-foreground">
+                すでにアカウントをお持ちの方は
+                <Link href="/auth/login" className="text-primary hover:underline ml-1">
+                  ログイン
+                </Link>
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </main>
+  )
 }
