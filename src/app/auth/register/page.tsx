@@ -40,7 +40,7 @@ export default function RegisterPage() {
 
     try {
       // Supabaseでユーザー登録
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -55,8 +55,8 @@ export default function RegisterPage() {
 
       // 登録成功
       router.push('/auth/verify-email')
-    } catch (error: any) {
-      setError(error.message || '登録に失敗しました')
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '登録に失敗しました')
     } finally {
       setIsLoading(false)
     }

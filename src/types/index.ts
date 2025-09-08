@@ -27,7 +27,7 @@ export interface Expense {
   description?: string
   receipt_url?: string
   split_type?: string
-  splits?: Record<string, any>
+  splits?: Record<string, number>
   created_at: string
 }
 

@@ -61,7 +61,7 @@ export const participantApi = {
   },
 
   // リアルタイム購読
-  subscribe(eventId: string, callback: (payload: any) => void) {
+  subscribe(eventId: string, callback: (payload: unknown) => void) {
     const supabase = createClient()
     
     const subscription = supabase

@@ -96,8 +96,8 @@ export function ExpenseEditModal({ expense, isOpen, onClose, onSuccess, eventId 
       onSuccess()
       onClose()
       resetForm()
-    } catch (error: any) {
-      setError(error.message || '保存に失敗しました')
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '保存に失敗しました')
     } finally {
       setIsLoading(false)
     }
@@ -111,8 +111,8 @@ export function ExpenseEditModal({ expense, isOpen, onClose, onSuccess, eventId 
       await expenseApi.delete(expense.id)
       onSuccess()
       onClose()
-    } catch (error: any) {
-      setError(error.message || '削除に失敗しました')
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '削除に失敗しました')
     } finally {
       setIsLoading(false)
     }

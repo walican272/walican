@@ -40,7 +40,7 @@ interface UserGroup {
 export default function DashboardPage() {
   const router = useRouter()
   const supabase = createClient()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{ id: string; email?: string; user_metadata?: { name?: string } } | null>(null)
   const [events, setEvents] = useState<UserEvent[]>([])
   const [groups, setGroups] = useState<UserGroup[]>([])
   const [isLoading, setIsLoading] = useState(true)
