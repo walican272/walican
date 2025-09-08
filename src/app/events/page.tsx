@@ -90,7 +90,7 @@ export default function EventsPage() {
     <>
       <Header 
         title="イベント一覧"
-        action={
+        backButton={
           <Link href="/dashboard">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />

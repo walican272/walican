@@ -82,7 +82,7 @@ export default function GroupsPage() {
     <>
       <Header 
         title="グループ"
-        action={
+        backButton={
           <Link href="/dashboard">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
