@@ -26,6 +26,8 @@ export interface Expense {
   category: ExpenseCategory
   description?: string
   receipt_url?: string
+  split_type?: string
+  splits?: Record<string, any>
   created_at: string
 }
 
