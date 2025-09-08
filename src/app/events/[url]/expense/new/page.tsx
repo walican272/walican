@@ -103,7 +103,7 @@ export default function NewExpensePage() {
           amount,
           currency: 'JPY',
           category: formData.category,
-          description: formData.description || null,
+          description: formData.description || undefined,
         },
         splits
       )
