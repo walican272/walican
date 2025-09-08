@@ -59,8 +59,8 @@ export default function NewEventPage() {
     <>
       <Header 
         title="新しいイベント"
-        action={
-          <Link href="/">
+        backButton={
+          <Link href="/dashboard">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
             </Button>
