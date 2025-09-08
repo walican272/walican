@@ -27,7 +27,7 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password
       })
@@ -36,8 +36,8 @@ export default function LoginPage() {
 
       // ログイン成功後、ダッシュボードへ
       router.push('/dashboard')
-    } catch (error: any) {
-      setError(error.message || 'ログインに失敗しました')
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'ログインに失敗しました')
     } finally {
       setIsLoading(false)
     }
@@ -48,7 +48,7 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`
@@ -56,8 +56,8 @@ export default function LoginPage() {
       })
 
       if (error) throw error
-    } catch (error: any) {
-      setError(error.message || 'ログインに失敗しました')
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'ログインに失敗しました')
       setIsLoading(false)
     }
   }
