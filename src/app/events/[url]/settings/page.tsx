@@ -105,7 +105,7 @@ export default function EventSettingsPage() {
         ...event,
         name: editForm.name,
         description: editForm.description,
-        date: editForm.date || null,
+        date: editForm.date || '',
         location: editForm.location,
         currency: editForm.currency
       })

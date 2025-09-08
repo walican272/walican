@@ -5,6 +5,7 @@ export interface Event {
   date: string
   description?: string
   location?: string
+  currency?: string
   created_at: string
 }
 
