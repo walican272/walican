@@ -65,7 +65,7 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // ユーザーが作成したイベントを取得
+      // 最近のイベントを取得（user_idカラムがないため、全イベント取得）
       const { data: eventsData } = await supabase
         .from('events')
         .select(`
@@ -75,7 +75,6 @@ export default function DashboardPage() {
           date,
           created_at
         `)
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(5)
 
