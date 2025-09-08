@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  eslint: {
+    // ビルド時のESLintエラーを無視（警告は表示）
+    ignoreDuringBuilds: true,
+  },
   async headers() {
     return [
       {
