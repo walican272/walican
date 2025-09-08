@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { expenseApi } from '@/lib/supabase/api/expenses'
 import { participantApi } from '@/lib/supabase/api/participants'
-import type { Expense, Participant } from '@/types'
+import type { Expense, Participant, ExpenseCategory } from '@/types'
 
 interface ExpenseEditModalProps {
   expense: Expense | null
@@ -83,7 +83,7 @@ export function ExpenseEditModal({ expense, isOpen, onClose, onSuccess, eventId 
       const updateData = {
         description: formData.description,
         amount,
-        category: formData.category,
+        category: formData.category as ExpenseCategory,
         paid_by: formData.paid_by,
         split_type: formData.split_type,
         splits: formData.split_type === 'custom' ? formData.splits : {}
