@@ -47,7 +47,7 @@ export function ExpenseEditModal({ expense, isOpen, onClose, onSuccess, eventId 
         amount: expense.amount.toString(),
         category: expense.category,
         paid_by: expense.paid_by,
-        split_type: expense.split_type || 'equal',
+        split_type: (expense.split_type || 'equal') as 'equal' | 'custom',
         splits: expense.splits || {}
       })
     }
