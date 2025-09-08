@@ -78,3 +78,20 @@ export const EXPENSE_CATEGORIES: Record<ExpenseCategory, { label: string; icon: 
   shopping: { label: '買い物', icon: '🛍️' },
   other: { label: 'その他', icon: '📝' },
 }
+
+export interface Group {
+  id: string
+  name: string
+  description?: string | null
+  creator_id?: string | null
+  created_at: string
+}
+
+export interface GroupMember {
+  id: string
+  group_id: string
+  user_email: string
+  user_name?: string | null
+  role: string
+  joined_at: string
+}

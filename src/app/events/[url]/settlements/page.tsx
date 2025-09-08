@@ -13,16 +13,19 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, ArrowRight, CheckCircle, Calculator } from 'lucide-react'
 import { calculateBalances, calculateSettlements } from '@/lib/utils/settlement'
 import type { Event, Participant, Expense } from '@/types'
+import { useRouter } from 'next/navigation'
 
 export default function SettlementsPage() {
   const params = useParams()
   const eventUrl = params.url as string
   const supabase = createClient()
+  const router = useRouter()
   
   const [event, setEvent] = useState<Event | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isSettling, setIsSettling] = useState(false)
 
   useEffect(() => {
     if (eventUrl) {
@@ -61,6 +64,49 @@ export default function SettlementsPage() {
   const balances = calculateBalances(participants, expenses)
   const settlements = calculateSettlements(balances)
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0)
+
+  const handleCompleteSettlement = async () => {
+    if (!event || isSettling) return
+    
+    setIsSettling(true)
+    try {
+      // 精算データを保存
+      const settlementRecords = settlements.map(s => ({
+        event_id: event.id,
+        from_participant: s.from.id,
+        to_participant: s.to.id,
+        amount: s.amount,
+        currency: event.currency || 'JPY',
+        settled_at: new Date().toISOString(),
+        status: 'completed'
+      }))
+
+      if (settlementRecords.length > 0) {
+        const { error } = await supabase
+          .from('settlements')
+          .insert(settlementRecords)
+
+        if (error) throw error
+      }
+
+      // 全ての expense_splits を settled に更新
+      const { error: updateError } = await supabase
+        .from('expense_splits')
+        .update({ is_settled: true })
+        .in('expense_id', expenses.map(e => e.id))
+
+      if (updateError) throw updateError
+
+      // 成功したらイベントページにリダイレクト
+      alert('精算が完了しました！')
+      router.push(`/events/${eventUrl}`)
+    } catch (error) {
+      console.error('Error completing settlement:', error)
+      alert('精算の完了に失敗しました')
+    } finally {
+      setIsSettling(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -187,9 +233,14 @@ export default function SettlementsPage() {
 
           {/* 精算完了ボタン */}
           {settlements.length > 0 && (
-            <Button className="w-full" size="lg">
+            <Button 
+              className="w-full" 
+              size="lg"
+              onClick={handleCompleteSettlement}
+              disabled={isSettling}
+            >
               <CheckCircle className="mr-2 h-5 w-5" />
-              精算を完了する
+              {isSettling ? '処理中...' : '精算を完了する'}
             </Button>
           )}
         </div>

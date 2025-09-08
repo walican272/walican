@@ -15,7 +15,8 @@ export interface Settlement {
 
 export function calculateBalances(
   participants: Participant[],
-  expenses: Expense[]
+  expenses: Expense[],
+  expenseSplits?: ExpenseSplit[]
 ): Balance[] {
   // 各参加者の支払い合計を計算
   const paidByParticipant: Record<string, number> = {}
@@ -32,15 +33,26 @@ export function calculateBalances(
     paidByParticipant[expense.paid_by] = (paidByParticipant[expense.paid_by] || 0) + expense.amount
   })
 
-  // 総額を計算
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0)
-  
-  // 均等割りで各人が払うべき金額を計算（簡易版）
-  // TODO: expense_splitsテーブルから実際の分割情報を取得
-  const perPerson = participants.length > 0 ? totalExpenses / participants.length : 0
-  
-  participants.forEach(p => {
-    shouldPayByParticipant[p.id] = perPerson
+  // 各経費について、参加者が払うべき金額を計算
+  expenses.forEach(expense => {
+    if (expense.split_type === 'custom' && expense.splits) {
+      // カスタム分割の場合、splitsフィールドから分割情報を取得
+      Object.entries(expense.splits).forEach(([participantId, amount]) => {
+        shouldPayByParticipant[participantId] = (shouldPayByParticipant[participantId] || 0) + (amount as number)
+      })
+    } else if (expenseSplits) {
+      // expense_splitsテーブルからデータを取得
+      const splitsForExpense = expenseSplits.filter(s => s.expense_id === expense.id)
+      splitsForExpense.forEach(split => {
+        shouldPayByParticipant[split.participant_id] = (shouldPayByParticipant[split.participant_id] || 0) + split.amount
+      })
+    } else {
+      // デフォルトは均等割り
+      const perPerson = expense.amount / participants.length
+      participants.forEach(p => {
+        shouldPayByParticipant[p.id] = (shouldPayByParticipant[p.id] || 0) + perPerson
+      })
+    }
   })
 
   // バランスを計算

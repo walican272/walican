@@ -302,5 +302,3 @@ settlements.map(s => `${s.from.name} → ${s.to.name}: ¥${s.amount.toLocaleStri
     </>
   )
 }
-
-import { Label } from '@/components/ui/label'

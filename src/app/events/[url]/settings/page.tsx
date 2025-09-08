@@ -27,7 +27,8 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { participantApi } from '@/lib/supabase/api/participants'
-import type { Event, Participant } from '@/types'
+import { expenseApi } from '@/lib/supabase/api/expenses'
+import type { Event, Participant, Expense } from '@/types'
 
 export default function EventSettingsPage() {
   const params = useParams()
@@ -37,6 +38,7 @@ export default function EventSettingsPage() {
 
   const [event, setEvent] = useState<Event | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
+  const [expenses, setExpenses] = useState<Expense[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [isParticipantModalOpen, setIsParticipantModalOpen] = useState(false)
@@ -74,9 +76,13 @@ export default function EventSettingsPage() {
         currency: eventData.currency || 'JPY'
       })
 
-      // 参加者を取得
-      const participantsData = await participantApi.getByEventId(eventData.id)
+      // 参加者と支払いを取得
+      const [participantsData, expensesData] = await Promise.all([
+        participantApi.getByEventId(eventData.id),
+        expenseApi.getByEventId(eventData.id)
+      ])
       setParticipants(participantsData)
+      setExpenses(expensesData)
     } catch (error) {
       console.error('Error loading event data:', error)
     } finally {
@@ -339,7 +345,7 @@ export default function EventSettingsPage() {
                 <div className="space-y-2">
                   {participants.map((participant) => {
                     // 支払いがある参加者は削除できない
-                    const hasExpenses = false // TODO: 実際の支払いチェック
+                    const hasExpenses = expenses.some(e => e.paid_by === participant.id)
                     return (
                       <div key={participant.id} className="flex items-center justify-between rounded-lg border p-3">
                         <div>
