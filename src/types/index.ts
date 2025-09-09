@@ -2,11 +2,18 @@ export interface Event {
   id: string
   unique_url: string
   name: string
-  date: string
+  date?: string
   description?: string
   location?: string
   currency?: string
+  is_quick_mode?: boolean
+  expires_at?: string
   created_at: string
+}
+
+export interface QuickEvent extends Event {
+  is_quick_mode: true
+  expires_at: string
 }
 
 export interface Participant {
