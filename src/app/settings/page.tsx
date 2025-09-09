@@ -4,14 +4,9 @@ import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { User } from '@supabase/supabase-js'
-import { Header } from '@/components/layout/header'
-import { BottomNav } from '@/components/layout/bottom-nav'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import type { User } from '@supabase/supabase-js'
+import Link from 'next/link'
+import { toast } from 'sonner'
 import { 
   Moon, 
   Sun, 
@@ -24,8 +19,13 @@ import {
   Wallet,
   Settings
 } from 'lucide-react'
-import { toast } from 'sonner'
-import Link from 'next/link'
+import { Header } from '@/components/layout/header'
+import { BottomNav } from '@/components/layout/bottom-nav'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface UserProfile {
   id?: string
