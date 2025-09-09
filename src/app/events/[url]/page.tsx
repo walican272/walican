@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Header } from '@/components/layout/header'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { ExpenseEditModal } from '@/components/expense-edit-modal'
+import { ExpenseCreateModal } from '@/components/expense/expense-create-modal'
 import { ParticipantsList } from '@/components/participants/participants-list'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -39,6 +40,7 @@ export default function EventDetailPage() {
   const [isCopied, setIsCopied] = useState(false)
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
   const [isExpenseEditModalOpen, setIsExpenseEditModalOpen] = useState(false)
+  const [isExpenseCreateModalOpen, setIsExpenseCreateModalOpen] = useState(false)
 
   const loadEventData = useCallback(async () => {
     setIsLoading(true)
@@ -249,12 +251,13 @@ export default function EventDetailPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">支払い履歴</CardTitle>
-              <Link href={`/events/${eventUrl}/expense/new`}>
-                <Button size="sm">
-                  <Plus className="mr-1 h-4 w-4" />
-                  追加
-                </Button>
-              </Link>
+              <Button 
+                size="sm"
+                onClick={() => setIsExpenseCreateModalOpen(true)}
+              >
+                <Plus className="mr-1 h-4 w-4" />
+                追加
+              </Button>
             </CardHeader>
             <CardContent>
               {expenses.length === 0 ? (
@@ -320,6 +323,13 @@ export default function EventDetailPage() {
           setIsExpenseEditModalOpen(false)
           setSelectedExpense(null)
         }}
+        onSuccess={() => loadEventData()}
+      />
+
+      <ExpenseCreateModal
+        eventId={event?.id || ''}
+        isOpen={isExpenseCreateModalOpen}
+        onClose={() => setIsExpenseCreateModalOpen(false)}
         onSuccess={() => loadEventData()}
       />
     </>
