@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/client'
 import type { Event } from '@/types'
 import { nanoid } from 'nanoid'
+import { validateUrlParam, validateEventName, sanitizeString } from '@/lib/utils/validation'
 
 export const eventApi = {
   // ユーザーのイベント取得
@@ -18,6 +19,12 @@ export const eventApi = {
   },
   // イベント作成
   async create(data: Omit<Event, 'id' | 'unique_url' | 'created_at'> & { user_id?: string }) {
+    // バリデーション
+    const nameValidation = validateEventName(data.name)
+    if (!nameValidation.isValid) {
+      throw new Error(nameValidation.error)
+    }
+    
     const supabase = createClient()
     const uniqueUrl = nanoid(10)
     
@@ -28,6 +35,9 @@ export const eventApi = {
       .from('events')
       .insert({
         ...data,
+        name: sanitizeString(data.name),
+        description: data.description ? sanitizeString(data.description) : null,
+        location: data.location ? sanitizeString(data.location) : null,
         unique_url: uniqueUrl,
         user_id: data.user_id || user?.id || null,
       })
@@ -40,6 +50,12 @@ export const eventApi = {
 
   // イベント取得（URL）
   async getByUrl(url: string) {
+    // URLパラメータのバリデーション
+    const urlValidation = validateUrlParam(url)
+    if (!urlValidation.isValid) {
+      throw new Error(urlValidation.error)
+    }
+    
     const supabase = createClient()
     
     const { data, error } = await supabase
@@ -54,6 +70,23 @@ export const eventApi = {
 
   // イベント更新
   async update(id: string, data: Partial<Event>) {
+    // 更新データのバリデーション
+    if (data.name) {
+      const nameValidation = validateEventName(data.name)
+      if (!nameValidation.isValid) {
+        throw new Error(nameValidation.error)
+      }
+      data.name = sanitizeString(data.name)
+    }
+    
+    if (data.description) {
+      data.description = sanitizeString(data.description)
+    }
+    
+    if (data.location) {
+      data.location = sanitizeString(data.location)
+    }
+    
     const supabase = createClient()
     
     const { data: event, error } = await supabase

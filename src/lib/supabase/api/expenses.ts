@@ -1,39 +1,53 @@
 import { createClient } from '@/lib/supabase/client'
 import type { Expense, ExpenseSplit } from '@/types'
+import { validateUUID, validateAmount, sanitizeString } from '@/lib/utils/validation'
 
 export const expenseApi = {
-  // 支払い追加
+  // 支払い追加（原子的トランザクション）
   async create(data: Omit<Expense, 'id' | 'created_at'>, splits?: ExpenseSplit[]) {
-    const supabase = createClient()
-    
-    // トランザクション的に処理
-    const { data: expense, error: expenseError } = await supabase
-      .from('expenses')
-      .insert(data)
-      .select()
-      .single()
-    
-    if (expenseError) throw expenseError
-    
-    // 分割情報がある場合は追加
-    if (splits && splits.length > 0) {
-      const splitsWithExpenseId = splits.map(split => ({
-        ...split,
-        expense_id: expense.id,
-      }))
-      
-      const { error: splitsError } = await supabase
-        .from('expense_splits')
-        .insert(splitsWithExpenseId)
-      
-      if (splitsError) throw splitsError
+    // バリデーション
+    const eventValidation = validateUUID(data.event_id)
+    if (!eventValidation.isValid) {
+      throw new Error('無効なイベントIDです')
     }
     
-    return expense
+    const amountValidation = validateAmount(data.amount)
+    if (!amountValidation.isValid) {
+      throw new Error(amountValidation.error)
+    }
+    
+    const supabase = createClient()
+    
+    // DBファンクションを使用して原子的に処理
+    const expenseData = {
+      ...data,
+      description: data.description ? sanitizeString(data.description) : null,
+    }
+    
+    const splitsData = splits?.map(split => ({
+      participant_id: split.participant_id,
+      amount: split.amount,
+      is_settled: split.is_settled || false,
+    })) || []
+    
+    const { data: result, error } = await supabase
+      .rpc('create_expense_with_splits', {
+        expense_data: expenseData,
+        splits_data: splitsData,
+      })
+    
+    if (error) throw error
+    return result
   },
 
   // イベントの支払い一覧取得
   async getByEventId(eventId: string) {
+    // イベントIDのバリデーション
+    const validation = validateUUID(eventId)
+    if (!validation.isValid) {
+      throw new Error('無効なイベントIDです')
+    }
+    
     const supabase = createClient()
     
     const { data, error } = await supabase

@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { ArrowLeft, Calculator, Users, Camera } from 'lucide-react'
 import { OcrScanner } from '@/components/expense/ocr-scanner'
 import Link from 'next/link'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
 import type { Event, Participant, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types'
 
 export default function NewExpensePage() {
@@ -20,6 +21,7 @@ export default function NewExpensePage() {
   const router = useRouter()
   const eventUrl = params.url as string
   const supabase = createClient()
+  const { handleError } = useErrorHandler()
   
   const [event, setEvent] = useState<Event | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
@@ -67,7 +69,7 @@ export default function NewExpensePage() {
         setCustomSplits(splits)
       }
     } catch (error) {
-      console.error('Error loading event data:', error)
+      handleError(error, 'イベントデータの読み込みに失敗しました')
     }
   }
 
@@ -110,8 +112,7 @@ export default function NewExpensePage() {
 
       router.push(`/events/${eventUrl}`)
     } catch (error) {
-      console.error('Error creating expense:', error)
-      alert('支払いの追加に失敗しました')
+      handleError(error, '支払いの追加に失敗しました')
     } finally {
       setIsLoading(false)
     }

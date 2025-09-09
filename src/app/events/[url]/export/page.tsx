@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Download, Copy, FileText, FileJson, Table } from 'lucide-react'
 import Link from 'next/link'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
 import { calculateBalances, calculateSettlements } from '@/lib/utils/settlement'
 import type { Event, Participant, Expense } from '@/types'
 
@@ -19,6 +20,7 @@ export default function ExportPage() {
   const router = useRouter()
   const eventUrl = params.url as string
   const supabase = createClient()
+  const { handleError } = useErrorHandler()
   
   const [event, setEvent] = useState<Event | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
@@ -56,7 +58,7 @@ export default function ExportPage() {
       // 最後に開いたイベントとして保存
       localStorage.setItem('lastEventUrl', eventUrl)
     } catch (error) {
-      console.error('Error loading data:', error)
+      handleError(error, 'データの読み込みに失敗しました')
     } finally {
       setIsLoading(false)
     }
@@ -182,9 +184,10 @@ settlements.map(s => `${s.from.name} → ${s.to.name}: ¥${s.amount.toLocaleStri
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(exportData)
+      // 成功時は成功メッセージを表示（将来的にトースト通知に変更予定）
       alert('クリップボードにコピーしました')
     } catch (error) {
-      console.error('Copy failed:', error)
+      handleError(error, 'クリップボードへのコピーに失敗しました')
     }
   }
 

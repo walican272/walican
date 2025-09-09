@@ -4,6 +4,8 @@ import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 // import { ServiceWorkerRegistration } from '@/components/service-worker-registration'
 import { AuthProvider } from '@/components/auth/auth-provider'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -45,9 +47,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            {/* Service Workerを一時的に無効化 */}
-            {/* <ServiceWorkerRegistration /> */}
-            <div className="relative flex min-h-screen flex-col">{children}</div>
+            <ErrorBoundary>
+              {/* Service Workerを一時的に無効化 */}
+              {/* <ServiceWorkerRegistration /> */}
+              <div className="relative flex min-h-screen flex-col">{children}</div>
+              <Toaster />
+            </ErrorBoundary>
           </AuthProvider>
         </ThemeProvider>
       </body>

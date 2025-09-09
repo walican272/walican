@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { nanoid } from 'nanoid'
 import { createClient } from '@/lib/supabase/client'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
+import { validateEventName, validateDescription, validateDate, sanitizeString } from '@/lib/utils/validation'
 import { Header } from '@/components/layout/header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -15,6 +17,7 @@ import Link from 'next/link'
 export default function NewEventPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { handleError } = useErrorHandler()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -25,21 +28,40 @@ export default function NewEventPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name) return
+    
+    // 入力検証
+    const nameValidation = validateEventName(formData.name)
+    if (!nameValidation.isValid) {
+      handleError(nameValidation.error, nameValidation.error)
+      return
+    }
+    
+    const descValidation = validateDescription(formData.description)
+    if (!descValidation.isValid) {
+      handleError(descValidation.error, descValidation.error)
+      return
+    }
+    
+    const dateValidation = validateDate(formData.date)
+    if (!dateValidation.isValid) {
+      handleError(dateValidation.error, dateValidation.error)
+      return
+    }
 
     setIsLoading(true)
     
     try {
       const uniqueUrl = nanoid(10)
       
+      // データをサニタイズしてから保存
       const { data, error } = await supabase
         .from('events')
         .insert({
           unique_url: uniqueUrl,
-          name: formData.name,
+          name: sanitizeString(formData.name),
           date: formData.date || null,
-          location: formData.location || null,
-          description: formData.description || null,
+          location: sanitizeString(formData.location) || null,
+          description: sanitizeString(formData.description) || null,
         })
         .select()
         .single()
@@ -48,8 +70,7 @@ export default function NewEventPage() {
 
       router.push(`/events/${uniqueUrl}`)
     } catch (error) {
-      console.error('Error creating event:', error)
-      alert('イベントの作成に失敗しました')
+      handleError(error, 'イベントの作成に失敗しました')
     } finally {
       setIsLoading(false)
     }

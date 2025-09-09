@@ -11,10 +11,12 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, Users, Plus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
 
 export default function NewGroupPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { handleError } = useErrorHandler()
   
   const [isCreating, setIsCreating] = useState(false)
   const [formData, setFormData] = useState({
@@ -27,7 +29,7 @@ export default function NewGroupPage() {
     e.preventDefault()
     
     if (!formData.name.trim()) {
-      alert('グループ名を入力してください')
+      handleError('グループ名が入力されていません', 'グループ名を入力してください')
       return
     }
 
@@ -60,15 +62,14 @@ export default function NewGroupPage() {
           .insert(memberRecords)
 
         if (memberError) {
-          console.error('Error adding members:', memberError)
+          handleError(memberError, 'メンバーの追加に失敗しました')
         }
       }
 
       alert('グループを作成しました！')
       router.push('/dashboard')
     } catch (error) {
-      console.error('Error creating group:', error)
-      alert('グループの作成に失敗しました')
+      handleError(error, 'グループの作成に失敗しました')
     } finally {
       setIsCreating(false)
     }

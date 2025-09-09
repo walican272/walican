@@ -20,12 +20,12 @@ export async function scanReceipt(imageFile: File): Promise<ExtractedReceiptData
       imageUrl,
       'jpn+eng', // 日本語と英語
       {
-        logger: (m) => console.log('OCR Progress:', m),
+        // logger: (m) => console.log('OCR Progress:', m), // 本番環境では無効化
       }
     )
     
     const text = result.data.text
-    console.log('OCR Result:', text)
+    // console.log('OCR Result:', text) // 本番環境では無効化
     
     // テキストから情報を抽出
     return extractReceiptInfo(text)

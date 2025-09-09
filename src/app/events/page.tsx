@@ -10,6 +10,7 @@ import { Calendar, MapPin, Users, Plus, ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
 
 interface EventWithStats {
   id: string
@@ -26,6 +27,7 @@ interface EventWithStats {
 export default function EventsPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { handleError } = useErrorHandler()
   const [events, setEvents] = useState<EventWithStats[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -69,7 +71,7 @@ export default function EventsPage() {
 
       setEvents(formattedEvents)
     } catch (error) {
-      console.error('Error loading events:', error)
+      handleError(error, 'イベントの読み込みに失敗しました')
     } finally {
       setIsLoading(false)
     }

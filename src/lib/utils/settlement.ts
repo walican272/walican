@@ -1,5 +1,16 @@
 import type { Participant, Expense, ExpenseSplit } from '@/types'
 
+// 通貨計算を整数（最小単位）で行うためのヘルパー
+const CURRENCY_PRECISION = 100 // 1円 = 100（小数点以下2桁まで対応）
+
+export const toMinorUnit = (amount: number): number => {
+  return Math.round(amount * CURRENCY_PRECISION)
+}
+
+export const toMajorUnit = (amount: number): number => {
+  return Math.round(amount) / CURRENCY_PRECISION
+}
+
 export interface Balance {
   participant: Participant
   paid: number
@@ -28,9 +39,13 @@ export function calculateBalances(
     shouldPayByParticipant[p.id] = 0
   })
 
-  // 支払い額を集計
+  // 支払い額を集計（整数演算で精度を保つ）
   expenses.forEach(expense => {
-    paidByParticipant[expense.paid_by] = (paidByParticipant[expense.paid_by] || 0) + expense.amount
+    const payerId = expense.paid_by || expense.payer_id
+    if (payerId) {
+      const amountInMinor = toMinorUnit(expense.amount)
+      paidByParticipant[payerId] = (paidByParticipant[payerId] || 0) + amountInMinor
+    }
   })
 
   // 各経費について、参加者が払うべき金額を計算
@@ -38,29 +53,36 @@ export function calculateBalances(
     if (expense.split_type === 'custom' && expense.splits) {
       // カスタム分割の場合、splitsフィールドから分割情報を取得
       Object.entries(expense.splits).forEach(([participantId, amount]) => {
-        shouldPayByParticipant[participantId] = (shouldPayByParticipant[participantId] || 0) + (amount as number)
+        const amountInMinor = toMinorUnit(amount as number)
+        shouldPayByParticipant[participantId] = (shouldPayByParticipant[participantId] || 0) + amountInMinor
       })
     } else if (expenseSplits) {
       // expense_splitsテーブルからデータを取得
       const splitsForExpense = expenseSplits.filter(s => s.expense_id === expense.id)
       splitsForExpense.forEach(split => {
-        shouldPayByParticipant[split.participant_id] = (shouldPayByParticipant[split.participant_id] || 0) + split.amount
+        const amountInMinor = toMinorUnit(split.amount)
+        shouldPayByParticipant[split.participant_id] = (shouldPayByParticipant[split.participant_id] || 0) + amountInMinor
       })
     } else {
-      // デフォルトは均等割り
-      const perPerson = expense.amount / participants.length
-      participants.forEach(p => {
-        shouldPayByParticipant[p.id] = (shouldPayByParticipant[p.id] || 0) + perPerson
+      // デフォルトは均等割り（整数演算で精度を保つ）
+      const amountInMinor = toMinorUnit(expense.amount)
+      const perPersonMinor = Math.floor(amountInMinor / participants.length)
+      const remainder = amountInMinor - (perPersonMinor * participants.length)
+      
+      participants.forEach((p, index) => {
+        // 余りを最初の人から順番に1円ずつ割り当て
+        const extra = index < remainder ? 1 : 0
+        shouldPayByParticipant[p.id] = (shouldPayByParticipant[p.id] || 0) + perPersonMinor + extra
       })
     }
   })
 
-  // バランスを計算
+  // バランスを計算（最終的にメジャー単位に戻す）
   return participants.map(participant => ({
     participant,
-    paid: paidByParticipant[participant.id] || 0,
-    shouldPay: shouldPayByParticipant[participant.id] || 0,
-    balance: (paidByParticipant[participant.id] || 0) - (shouldPayByParticipant[participant.id] || 0)
+    paid: toMajorUnit(paidByParticipant[participant.id] || 0),
+    shouldPay: toMajorUnit(shouldPayByParticipant[participant.id] || 0),
+    balance: toMajorUnit((paidByParticipant[participant.id] || 0) - (shouldPayByParticipant[participant.id] || 0))
   }))
 }
 
@@ -80,9 +102,13 @@ export function calculateSettlements(balances: Balance[]): Settlement[] {
     const debtor = debtors[i]
     const creditor = creditors[j]
     
-    const amount = Math.min(Math.abs(debtor.balance), creditor.balance)
+    // 整数演算で精度を保つ
+    const debtorBalanceMinor = toMinorUnit(Math.abs(debtor.balance))
+    const creditorBalanceMinor = toMinorUnit(creditor.balance)
+    const amountMinor = Math.min(debtorBalanceMinor, creditorBalanceMinor)
+    const amount = toMajorUnit(amountMinor)
     
-    if (amount > 0.5) { // 1円未満は無視
+    if (amountMinor >= 100) { // 1円未満は無視（100 = 1円）
       settlements.push({
         from: debtor.participant,
         to: creditor.participant,

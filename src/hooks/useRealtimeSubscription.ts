@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 interface UseRealtimeSubscriptionProps {
@@ -7,6 +7,13 @@ interface UseRealtimeSubscriptionProps {
 }
 
 export function useRealtimeSubscription({ eventId, onUpdate }: UseRealtimeSubscriptionProps) {
+  // コールバックをrefで保持してメモリリークを防ぐ
+  const onUpdateRef = useRef(onUpdate)
+  
+  useEffect(() => {
+    onUpdateRef.current = onUpdate
+  }, [onUpdate])
+  
   useEffect(() => {
     if (!eventId) return
 
@@ -24,8 +31,8 @@ export function useRealtimeSubscription({ eventId, onUpdate }: UseRealtimeSubscr
           filter: `event_id=eq.${eventId}`,
         },
         () => {
-          console.log('Participants updated')
-          onUpdate()
+          // console.logを削除（本番環境での情報漏洩防止）
+          onUpdateRef.current()
         }
       )
       .on(
@@ -37,8 +44,7 @@ export function useRealtimeSubscription({ eventId, onUpdate }: UseRealtimeSubscr
           filter: `event_id=eq.${eventId}`,
         },
         () => {
-          console.log('Expenses updated')
-          onUpdate()
+          onUpdateRef.current()
         }
       )
       .on(
@@ -49,14 +55,16 @@ export function useRealtimeSubscription({ eventId, onUpdate }: UseRealtimeSubscr
           table: 'expense_splits',
         },
         () => {
-          console.log('Expense splits updated')
-          onUpdate()
+          onUpdateRef.current()
         }
       )
       .subscribe()
 
+    // クリーンアップを強化
     return () => {
-      supabase.removeChannel(channel)
+      channel.unsubscribe().then(() => {
+        supabase.removeChannel(channel)
+      })
     }
-  }, [eventId, onUpdate])
+  }, [eventId]) // onUpdateを依存配列から除外
 }

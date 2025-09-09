@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -22,11 +22,14 @@ import {
 } from 'lucide-react'
 import type { Event, Participant, Expense, EXPENSE_CATEGORIES } from '@/types'
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
+import { formatCurrency } from '@/lib/utils/currency'
 
 export default function EventDetailPage() {
   const params = useParams()
   const eventUrl = params.url as string
   const supabase = createClient()
+  const { handleError } = useErrorHandler()
   
   const [event, setEvent] = useState<Event | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
@@ -69,7 +72,7 @@ export default function EventDetailPage() {
       if (expensesError) throw expensesError
       setExpenses(expensesData || [])
     } catch (error) {
-      console.error('Error loading event data:', error)
+      handleError(error, 'イベントデータの読み込みに失敗しました')
     } finally {
       setIsLoading(false)
     }
@@ -95,11 +98,12 @@ export default function EventDetailPage() {
       setIsCopied(true)
       setTimeout(() => setIsCopied(false), 2000)
     } catch (error) {
-      console.error('Error copying URL:', error)
+      handleError(error, 'URLのコピーに失敗しました')
     }
   }
 
-  const calculateBalance = () => {
+  // パフォーマンス最適化: 高価な計算をメモ化
+  const { totalExpenses, perPerson, balances } = useMemo(() => {
     const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
     const perPerson = participants.length > 0 ? totalExpenses / participants.length : 0
     
@@ -117,7 +121,7 @@ export default function EventDetailPage() {
     })
     
     return { totalExpenses, perPerson, balances }
-  }
+  }, [expenses, participants])
 
   if (isLoading) {
     return (
@@ -143,7 +147,7 @@ export default function EventDetailPage() {
     )
   }
 
-  const { totalExpenses, balances } = calculateBalance()
+  // calculateBalance関数は削除済み、useMemoで直接計算
 
   return (
     <>
@@ -236,11 +240,11 @@ export default function EventDetailPage() {
             <CardContent>
               <div className="mb-4 text-center">
                 <p className="text-2xl font-bold">
-                  合計: ¥{totalExpenses.toLocaleString()}
+                  合計: {formatCurrency(totalExpenses, event?.currency || 'JPY')}
                 </p>
                 {participants.length > 0 && (
                   <p className="text-sm text-muted-foreground">
-                    1人あたり: ¥{Math.round(totalExpenses / participants.length).toLocaleString()}
+                    1人あたり: {formatCurrency(Math.round(totalExpenses / participants.length), event?.currency || 'JPY')}
                   </p>
                 )}
               </div>

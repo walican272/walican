@@ -14,12 +14,14 @@ import { ArrowLeft, ArrowRight, CheckCircle, Calculator } from 'lucide-react'
 import { calculateBalances, calculateSettlements } from '@/lib/utils/settlement'
 import type { Event, Participant, Expense } from '@/types'
 import { useRouter } from 'next/navigation'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
 
 export default function SettlementsPage() {
   const params = useParams()
   const eventUrl = params.url as string
   const supabase = createClient()
   const router = useRouter()
+  const { handleError } = useErrorHandler()
   
   const [event, setEvent] = useState<Event | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
@@ -55,7 +57,7 @@ export default function SettlementsPage() {
       setParticipants(participantsData)
       setExpenses(expensesData)
     } catch (error) {
-      console.error('Error loading data:', error)
+      handleError(error, 'データの読み込みに失敗しました')
     } finally {
       setIsLoading(false)
     }
@@ -101,8 +103,7 @@ export default function SettlementsPage() {
       alert('精算が完了しました！')
       router.push(`/events/${eventUrl}`)
     } catch (error) {
-      console.error('Error completing settlement:', error)
-      alert('精算の完了に失敗しました')
+      handleError(error, '精算の完了に失敗しました')
     } finally {
       setIsSettling(false)
     }
