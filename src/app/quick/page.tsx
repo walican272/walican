@@ -60,15 +60,15 @@ export default function QuickCreatePage() {
     try {
       const uniqueUrl = nanoid(10)
       
-      // イベントを作成（is_quick_modeとexpires_atはまだDBに存在しないため一時的に除外）
+      // イベントを作成
       const { data: event, error: eventError } = await supabase
         .from('events')
         .insert({
           name: state.eventName,
           unique_url: uniqueUrl,
           description: `${state.participantCount}人で割り勘`,
-          // is_quick_mode: true, // TODO: マイグレーション実行後に有効化
-          // expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // TODO: マイグレーション実行後に有効化
+          is_quick_mode: true,
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30日後に期限切れ
         })
         .select()
         .single()
