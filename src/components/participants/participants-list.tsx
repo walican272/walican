@@ -68,11 +68,17 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
       if (expensesError) throw expensesError
 
       // 収支を計算
-      const calculatedBalances = calculateBalances(
+      const balanceList = calculateBalances(
         participantsData || [],
         expensesData || []
       )
-      setBalances(calculatedBalances)
+      
+      // Balance配列をRecord<string, number>に変換
+      const balanceMap: Record<string, number> = {}
+      balanceList.forEach(b => {
+        balanceMap[b.participant.id] = b.balance
+      })
+      setBalances(balanceMap)
     } catch (error) {
       console.error('Error loading participants:', error)
       toast.error('参加者の読み込みに失敗しました')
