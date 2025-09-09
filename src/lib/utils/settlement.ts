@@ -41,7 +41,7 @@ export function calculateBalances(
 
   // 支払い額を集計（整数演算で精度を保つ）
   expenses.forEach(expense => {
-    const payerId = expense.paid_by || expense.payer_id
+    const payerId = expense.paid_by
     if (payerId) {
       const amountInMinor = toMinorUnit(expense.amount)
       paidByParticipant[payerId] = (paidByParticipant[payerId] || 0) + amountInMinor
