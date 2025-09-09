@@ -12,6 +12,7 @@ import { ArrowLeft, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { nanoid } from 'nanoid'
+import { quickEventLimiter, getBrowserFingerprint } from '@/lib/utils/rate-limiter'
 
 interface QuickCreateState {
   currentStep: 1 | 2 | 3
@@ -55,6 +56,12 @@ export default function QuickCreatePage() {
   }
 
   const createQuickEvent = async () => {
+    // レート制限チェック
+    const fingerprint = getBrowserFingerprint()
+    if (!quickEventLimiter.check(fingerprint)) {
+      return // レート制限に引っかかった
+    }
+    
     setState(prev => ({ ...prev, isCreating: true }))
     
     try {

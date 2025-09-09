@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Header } from '@/components/layout/header'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { ExpenseEditModal } from '@/components/expense-edit-modal'
+import { ParticipantsList } from '@/components/participants/participants-list'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -193,31 +194,11 @@ export default function EventDetailPage() {
 
       <main className="container mx-auto p-4 pb-20">
         <div className="space-y-4">
-          {/* 参加者サマリー */}
-          {participants.length > 0 && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg">
-                  <Users className="mr-2 inline h-5 w-5" />
-                  参加者 ({participants.length}人)
-                </CardTitle>
-                <Link href={`/events/${eventUrl}/settings`}>
-                  <Button size="sm" variant="ghost">
-                    <Settings className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {participants.map((participant) => (
-                    <Badge key={participant.id} variant="secondary">
-                      {participant.name}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {/* 参加者リスト - 新しいコンポーネントに置き換え */}
+          <ParticipantsList 
+            eventId={event.id} 
+            isQuickMode={event.is_quick_mode}
+          />
 
           {/* 精算状況 */}
           <Card>
