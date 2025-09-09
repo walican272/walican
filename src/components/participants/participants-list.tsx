@@ -141,9 +141,22 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
     }
   }, [eventId])
 
+  // 現在のユーザーが紐付けている参加者を見つける
   const currentUserParticipant = participants.find(
     p => p.user_id === user?.id
   )
+  
+  // 他の参加者が「自分として登録」ボタンを表示するかどうかの判定
+  const canClaimParticipant = (participant: Participant) => {
+    // ユーザーがログインしていない場合は false
+    if (!user) return false
+    // 既に誰かが紐付けている場合は false
+    if (participant.user_id) return false
+    // 現在のユーザーが既に別の参加者として登録している場合は false
+    if (currentUserParticipant) return false
+    // それ以外は true
+    return true
+  }
 
   return (
     <Card className={className}>
@@ -189,6 +202,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                 eventId={eventId}
                 balance={balances[participant.id] || 0}
                 isCurrentUser={participant.id === currentUserParticipant?.id}
+                canClaim={canClaimParticipant(participant)}
                 onUpdate={loadParticipants}
               />
             ))}

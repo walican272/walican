@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/auth-provider'
+import { getCurrentUserDisplayName } from '@/lib/supabase/api/profiles'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -28,6 +29,7 @@ interface ParticipantItemProps {
   eventId: string
   balance?: number
   isCurrentUser?: boolean
+  canClaim?: boolean
   onUpdate?: () => void
   className?: string
 }
@@ -37,6 +39,7 @@ export const ParticipantItem: React.FC<ParticipantItemProps> = ({
   eventId,
   balance = 0,
   isCurrentUser = false,
+  canClaim = false,
   onUpdate,
   className,
 }) => {
@@ -82,11 +85,29 @@ export const ParticipantItem: React.FC<ParticipantItemProps> = ({
 
     setIsUpdating(true)
     try {
+      // まず、同じイベントで既に紐付けているか確認
+      const { data: existingClaim } = await supabase
+        .from('participants')
+        .select('id, name')
+        .eq('event_id', eventId)
+        .eq('user_id', user.id)
+        .single()
+      
+      if (existingClaim) {
+        toast.error(`このイベントには既に「${existingClaim.name}」として参加しています`)
+        return
+      }
+      
+      // ユーザーの表示名を取得
+      const displayName = await getCurrentUserDisplayName()
+      
+      // 参加者を紐付けて名前も更新
       const { error } = await supabase
         .from('participants')
         .update({ 
           user_id: user.id,
-          is_claimed: true 
+          is_claimed: true,
+          name: displayName // ユーザーの名前で上書き
         })
         .eq('id', participant.id)
         .is('user_id', null) // まだ誰も紐付けていない場合のみ
@@ -100,7 +121,7 @@ export const ParticipantItem: React.FC<ParticipantItemProps> = ({
         return
       }
 
-      toast.success('参加者として登録しました')
+      toast.success(`「${displayName}」として登録しました`)
       onUpdate?.()
     } catch (error) {
       console.error('Error claiming participant:', error)
@@ -205,7 +226,7 @@ export const ParticipantItem: React.FC<ParticipantItemProps> = ({
                 あなた
               </Badge>
             )}
-            {!participant.user_id && user && !isCurrentUser && (
+            {!participant.user_id && user && !isCurrentUser && canClaim && (
               <Button
                 variant="ghost"
                 size="sm"
