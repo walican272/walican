@@ -10,7 +10,7 @@ import { Header } from '@/components/layout/header'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, ArrowRight, CheckCircle, Calculator, Wallet, ExternalLink } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CheckCircle, Calculator } from 'lucide-react'
 import { calculateBalances, calculateSettlements } from '@/lib/utils/settlement'
 import type { Event, Participant, Expense } from '@/types'
 import { useRouter } from 'next/navigation'
@@ -28,7 +28,6 @@ export default function SettlementsPage() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSettling, setIsSettling] = useState(false)
-  const [participantPayPayLinks, setParticipantPayPayLinks] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (eventUrl) {
@@ -57,29 +56,6 @@ export default function SettlementsPage() {
 
       setParticipants(participantsData)
       setExpenses(expensesData)
-      
-      // 参加者のPayPayリンクを取得
-      const userIds = participantsData
-        .filter((p: Participant) => p.user_id)
-        .map((p: Participant) => p.user_id)
-      
-      if (userIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, display_name, paypay_link')
-          .in('id', userIds)
-        
-        if (profiles) {
-          const links: Record<string, string> = {}
-          profiles.forEach(profile => {
-            const participant = participantsData.find((p: Participant) => p.user_id === profile.id)
-            if (participant && profile.paypay_link) {
-              links[participant.id] = profile.paypay_link
-            }
-          })
-          setParticipantPayPayLinks(links)
-        }
-      }
     } catch (error) {
       handleError(error, 'データの読み込みに失敗しました')
     } finally {
@@ -260,18 +236,6 @@ export default function SettlementsPage() {
                       </div>
                       <div className="flex-1 text-right">
                         <p className="font-medium">{settlement.to.name}</p>
-                        {participantPayPayLinks[settlement.to.id] && (
-                          <a
-                            href={participantPayPayLinks[settlement.to.id]}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 mt-1 text-xs text-primary hover:underline"
-                          >
-                            <Wallet className="h-3 w-3" />
-                            PayPayで送金
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        )}
                       </div>
                     </div>
                   ))}
