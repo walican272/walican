@@ -1,11 +1,22 @@
 
-<svg width="192" height="192" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="60" fill="url(#grad)"/>
-  <text x="256" y="320" font-family="Arial" font-size="256" text-anchor="middle" fill="white">💰</text>
+<svg width="192" height="192" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <!-- 背景 -->
+  <rect width="192" height="192" rx="24" fill="#F5F5DC"/>
+  
+  <!-- 財布の本体 -->
+  <rect x="24" y="60" width="144" height="96" rx="18" fill="#8B4513" stroke="#654321" stroke-width="6"/>
+  
+  <!-- 財布の蓋 -->
+  <path d="M24 78 Q24 48, 48 48 L144 48 Q168 48, 168 78" fill="#A0522D" stroke="#654321" stroke-width="6"/>
+  
+  <!-- 留め金部分 -->
+  <rect x="120" y="90" width="60" height="48" rx="12" fill="#6B4423"/>
+  <circle cx="150" cy="114" r="12" fill="#FFD700" stroke="#B8860B" stroke-width="3"/>
+  
+  <!-- ハイライト -->
+  <rect x="36" y="72" width="96" height="12" fill="#D2691E" opacity="0.4"/>
+  
+  <!-- カード差し込み部分の線 -->
+  <line x1="48" y1="108" x2="108" y2="108" stroke="#654321" stroke-width="3" opacity="0.5"/>
+  <line x1="48" y1="126" x2="108" y2="126" stroke="#654321" stroke-width="3" opacity="0.5"/>
 </svg>

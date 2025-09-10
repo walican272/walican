@@ -136,7 +136,7 @@ export default function SettlementsPage() {
     <>
       <Header 
         title="精算"
-        action={
+        backButton={
           <Link href={`/events/${eventUrl}`}>
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />

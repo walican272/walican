@@ -151,7 +151,7 @@ export default function NewExpensePage() {
     <>
       <Header 
         title="支払いを追加"
-        action={
+        backButton={
           <Link href={`/events/${eventUrl}`}>
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />

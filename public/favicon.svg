@@ -1,5 +1,19 @@
 
-<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="4" fill="#667eea"/>
-  <text x="16" y="24" font-family="Arial" font-size="20" text-anchor="middle" fill="white">W</text>
+<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 財布の本体 -->
+  <rect x="4" y="10" width="24" height="16" rx="3" fill="#8B4513" stroke="#654321" stroke-width="1"/>
+  
+  <!-- 財布の蓋 -->
+  <path d="M4 13 Q4 8, 8 8 L24 8 Q28 8, 28 13" fill="#A0522D" stroke="#654321" stroke-width="1"/>
+  
+  <!-- 留め金部分 -->
+  <rect x="20" y="15" width="10" height="8" rx="2" fill="#6B4423"/>
+  <circle cx="25" cy="19" r="2" fill="#FFD700" stroke="#B8860B" stroke-width="0.5"/>
+  
+  <!-- ハイライト -->
+  <rect x="6" y="12" width="16" height="2" fill="#D2691E" opacity="0.4"/>
+  
+  <!-- カード差し込み部分の線 -->
+  <line x1="8" y1="18" x2="18" y2="18" stroke="#654321" stroke-width="0.5" opacity="0.5"/>
+  <line x1="8" y1="21" x2="18" y2="21" stroke="#654321" stroke-width="0.5" opacity="0.5"/>
 </svg>

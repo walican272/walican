@@ -198,7 +198,7 @@ export default function SettingsPage() {
     <>
       <Header 
         title="設定"
-        action={
+        backButton={
           <Link href="/">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
