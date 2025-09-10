@@ -20,7 +20,26 @@ import {
   Settings,
   AlertCircle
 } from 'lucide-react'
-import { validatePayPayLink } from '@/lib/utils/payment-validation'
+// import { validatePayPayLink } from '@/lib/utils/payment-validation'
+
+// PayPayリンクの検証（一時的にインライン実装）
+function validatePayPayLink(url: string): { isValid: boolean; error?: string } {
+  if (!url) {
+    return { isValid: false, error: 'URLを入力してください' }
+  }
+  
+  const validDomains = ['https://pay.paypay.ne.jp/', 'https://paypay.ne.jp/']
+  const isValidDomain = validDomains.some(domain => url.startsWith(domain))
+  
+  if (!isValidDomain) {
+    return { 
+      isValid: false, 
+      error: 'PayPayの公式リンクのみ許可されています' 
+    }
+  }
+  
+  return { isValid: true }
+}
 import { Header } from '@/components/layout/header'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
