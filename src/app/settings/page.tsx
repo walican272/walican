@@ -1,48 +1,29 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
-import { Header } from '../../components/layout/header'
-import { BottomNav } from '../../components/layout/bottom-nav'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Button } from '../../components/ui/button'
-
 export default function SettingsPage() {
-  const [mounted, setMounted] = useState(false)
-
   return (
-    <>
-      <Header 
-        title="設定"
-        action={
-          <Link href="/">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-        }
-      />
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
+        <div className="container flex h-14 items-center justify-between px-4">
+          <h1 className="text-lg font-semibold">設定</h1>
+        </div>
+      </header>
 
       <main className="container mx-auto p-4 pb-20">
         <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>設定</CardTitle>
-              <CardDescription>
-                アプリケーションの設定
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          <div className="rounded-lg border bg-card p-6">
+            <h2 className="text-xl font-semibold mb-2">設定</h2>
+            <p className="text-sm text-muted-foreground">
+              アプリケーションの設定
+            </p>
+            <div className="mt-4">
               <p className="text-muted-foreground">
                 設定機能は現在メンテナンス中です
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </main>
-
-      <BottomNav />
-    </>
+    </div>
   )
 }
