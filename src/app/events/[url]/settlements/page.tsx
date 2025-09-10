@@ -15,6 +15,7 @@ import { calculateBalances, calculateSettlements } from '@/lib/utils/settlement'
 import type { Event, Participant, Expense } from '@/types'
 import { useRouter } from 'next/navigation'
 import { useErrorHandler } from '@/hooks/useErrorHandler'
+import { ExpenseCreateModal } from '@/components/expense/expense-create-modal'
 
 export default function SettlementsPage() {
   const params = useParams()
@@ -28,6 +29,7 @@ export default function SettlementsPage() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSettling, setIsSettling] = useState(false)
+  const [isExpenseCreateModalOpen, setIsExpenseCreateModalOpen] = useState(false)
 
   useEffect(() => {
     if (eventUrl) {
@@ -259,7 +261,14 @@ export default function SettlementsPage() {
         </div>
       </main>
 
-      <BottomNav eventUrl={eventUrl} />
+      <BottomNav eventUrl={eventUrl} onAddClick={() => setIsExpenseCreateModalOpen(true)} />
+
+      <ExpenseCreateModal
+        eventId={event?.id || ''}
+        isOpen={isExpenseCreateModalOpen}
+        onClose={() => setIsExpenseCreateModalOpen(false)}
+        onSuccess={() => loadEventData()}
+      />
     </>
   )
 }

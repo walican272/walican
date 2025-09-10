@@ -362,7 +362,7 @@ export default function EventDetailPage() {
         </div>
       </main>
 
-      <BottomNav eventUrl={eventUrl} />
+      <BottomNav eventUrl={eventUrl} onAddClick={() => setIsExpenseCreateModalOpen(true)} />
 
       <ExpenseEditModal
         expense={selectedExpense}
