@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/components/auth/auth-provider'
 import { useErrorHandler } from '@/hooks/useErrorHandler'
 import { Header } from '@/components/layout/header'
 import { StatsCards } from '@/components/dashboard/StatsCards'
@@ -41,7 +41,7 @@ interface UserGroup {
 export default function DashboardPage() {
   const router = useRouter()
   const supabase = createClient()
-  const { user, isLoading: authLoading, logout } = useAuth()
+  const { user, loading: authLoading, signOut: logout } = useAuth()
   const { handleError } = useErrorHandler()
   const [events, setEvents] = useState<UserEvent[]>([])
   const [groups] = useState<UserGroup[]>([])
