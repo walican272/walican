@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -87,9 +87,21 @@ export default function SettlementsPage() {
     }
   }
 
-  const balances = calculateBalances(participants, expenses)
-  const settlements = calculateSettlements(balances)
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0)
+  // メモ化された計算結果
+  const balances = useMemo(
+    () => calculateBalances(participants, expenses),
+    [participants, expenses]
+  )
+  
+  const settlements = useMemo(
+    () => calculateSettlements(balances),
+    [balances]
+  )
+  
+  const totalExpenses = useMemo(
+    () => expenses.reduce((sum, e) => sum + e.amount, 0),
+    [expenses]
+  )
 
   const handleCompleteSettlement = async () => {
     if (!event || isSettling) return

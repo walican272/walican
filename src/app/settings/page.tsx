@@ -17,8 +17,10 @@ import {
   Info,
   ArrowLeft,
   Wallet,
-  Settings
+  Settings,
+  AlertCircle
 } from 'lucide-react'
+import { validatePayPayLink } from '@/lib/utils/payment-validation'
 import { Header } from '@/components/layout/header'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -44,6 +46,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [profile, setProfile] = useState<UserProfile>({})
+  const [payPayLinkError, setPayPayLinkError] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -87,6 +90,16 @@ export default function SettingsPage() {
       return
     }
     
+    // PayPayリンクの検証
+    if (profile.paypay_link) {
+      const validation = validatePayPayLink(profile.paypay_link)
+      if (!validation.isValid) {
+        setPayPayLinkError(validation.error || '無効なURLです')
+        toast.error(validation.error || '無効なURLです')
+        return
+      }
+    }
+    
     setSaving(true)
     try {
       const profileData = {
@@ -104,11 +117,24 @@ export default function SettingsPage() {
       if (error) throw error
       
       toast.success('プロフィールを保存しました')
+      setPayPayLinkError(null)
     } catch (error) {
       console.error('Error saving profile:', error)
       toast.error('プロフィールの保存に失敗しました')
     } finally {
       setSaving(false)
+    }
+  }
+  
+  const handlePayPayLinkChange = (value: string) => {
+    setProfile({ ...profile, paypay_link: value })
+    
+    // リアルタイムバリデーション
+    if (value) {
+      const validation = validatePayPayLink(value)
+      setPayPayLinkError(validation.isValid ? null : validation.error || null)
+    } else {
+      setPayPayLinkError(null)
     }
   }
 
@@ -269,15 +295,25 @@ export default function SettingsPage() {
                     
                     <div className="space-y-2">
                       <Label htmlFor="paypay_link">PayPay送金リンク</Label>
-                      <Input
-                        id="paypay_link"
-                        value={profile.paypay_link || ''}
-                        onChange={(e) => setProfile({ ...profile, paypay_link: e.target.value })}
-                        placeholder="https://pay.paypay.ne.jp/..."
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        PayPayアプリから「送金リンクを作成」で取得したURLを入力してください
-                      </p>
+                      <div className="relative">
+                        <Input
+                          id="paypay_link"
+                          value={profile.paypay_link || ''}
+                          onChange={(e) => handlePayPayLinkChange(e.target.value)}
+                          placeholder="https://pay.paypay.ne.jp/..."
+                          className={payPayLinkError ? 'border-red-500' : ''}
+                        />
+                        {payPayLinkError && (
+                          <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+                        )}
+                      </div>
+                      {payPayLinkError ? (
+                        <p className="text-xs text-red-500">{payPayLinkError}</p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">
+                          PayPayアプリから「送金リンクを作成」で取得したURLを入力してください
+                        </p>
+                      )}
                     </div>
                     
                     <Button onClick={saveProfile} disabled={saving} className="w-full">

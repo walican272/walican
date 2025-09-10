@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useReducer } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -27,23 +27,67 @@ import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
 import { useErrorHandler } from '@/hooks/useErrorHandler'
 import { formatCurrency } from '@/lib/utils/currency'
 
+// イベントデータの状態を管理するReducer
+type EventDataState = {
+  event: Event | null
+  participants: Participant[]
+  expenses: Expense[]
+  isLoading: boolean
+}
+
+type EventDataAction = 
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ALL_DATA'; payload: { event: Event; participants: Participant[]; expenses: Expense[] } }
+  | { type: 'SET_EVENT'; payload: Event }
+  | { type: 'SET_PARTICIPANTS'; payload: Participant[] }
+  | { type: 'SET_EXPENSES'; payload: Expense[] }
+
+function eventDataReducer(state: EventDataState, action: EventDataAction): EventDataState {
+  switch (action.type) {
+    case 'SET_LOADING':
+      return { ...state, isLoading: action.payload }
+    case 'SET_ALL_DATA':
+      return { 
+        ...state, 
+        event: action.payload.event,
+        participants: action.payload.participants,
+        expenses: action.payload.expenses,
+        isLoading: false
+      }
+    case 'SET_EVENT':
+      return { ...state, event: action.payload }
+    case 'SET_PARTICIPANTS':
+      return { ...state, participants: action.payload }
+    case 'SET_EXPENSES':
+      return { ...state, expenses: action.payload }
+    default:
+      return state
+  }
+}
+
 export default function EventDetailPage() {
   const params = useParams()
   const eventUrl = params.url as string
   const supabase = createClient()
   const { handleError } = useErrorHandler()
   
-  const [event, setEvent] = useState<Event | null>(null)
-  const [participants, setParticipants] = useState<Participant[]>([])
-  const [expenses, setExpenses] = useState<Expense[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  // バッチ処理のためにReducerを使用
+  const [eventData, dispatch] = useReducer(eventDataReducer, {
+    event: null,
+    participants: [],
+    expenses: [],
+    isLoading: true
+  })
+  
+  const { event, participants, expenses, isLoading } = eventData
+  
   const [isCopied, setIsCopied] = useState(false)
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
   const [isExpenseEditModalOpen, setIsExpenseEditModalOpen] = useState(false)
   const [isExpenseCreateModalOpen, setIsExpenseCreateModalOpen] = useState(false)
 
   const loadEventData = useCallback(async () => {
-    setIsLoading(true)
+    dispatch({ type: 'SET_LOADING', payload: true })
     try {
       // イベント情報を取得
       const { data: eventData, error: eventError } = await supabase
@@ -53,33 +97,38 @@ export default function EventDetailPage() {
         .single()
 
       if (eventError) throw eventError
-      setEvent(eventData)
 
-      // 参加者を取得
-      const { data: participantsData, error: participantsError } = await supabase
-        .from('participants')
-        .select('*')
-        .eq('event_id', eventData.id)
-        .order('created_at', { ascending: true })
+      // 並列でデータを取得
+      const [participantsResult, expensesResult] = await Promise.all([
+        supabase
+          .from('participants')
+          .select('*')
+          .eq('event_id', eventData.id)
+          .order('created_at', { ascending: true }),
+        supabase
+          .from('expenses')
+          .select('*')
+          .eq('event_id', eventData.id)
+          .order('created_at', { ascending: false })
+      ])
 
-      if (participantsError) throw participantsError
-      setParticipants(participantsData || [])
+      if (participantsResult.error) throw participantsResult.error
+      if (expensesResult.error) throw expensesResult.error
 
-      // 支払いを取得
-      const { data: expensesData, error: expensesError } = await supabase
-        .from('expenses')
-        .select('*')
-        .eq('event_id', eventData.id)
-        .order('created_at', { ascending: false })
-
-      if (expensesError) throw expensesError
-      setExpenses(expensesData || [])
+      // 一度にすべてのデータを更新（バッチ処理）
+      dispatch({
+        type: 'SET_ALL_DATA',
+        payload: {
+          event: eventData,
+          participants: participantsResult.data || [],
+          expenses: expensesResult.data || []
+        }
+      })
     } catch (error) {
       handleError(error, 'イベントデータの読み込みに失敗しました')
-    } finally {
-      setIsLoading(false)
+      dispatch({ type: 'SET_LOADING', payload: false })
     }
-  }, [eventUrl, supabase])
+  }, [eventUrl, supabase, handleError])
 
   useEffect(() => {
     if (eventUrl) {
