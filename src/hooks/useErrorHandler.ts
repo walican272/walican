@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/utils/logger'
 
 interface ErrorState {
   message: string | null
@@ -12,7 +13,7 @@ export const useErrorHandler = () => {
   const [isError, setIsError] = useState(false)
 
   const handleError = useCallback((error: unknown, userMessage?: string) => {
-    console.error('Error occurred:', error)
+    logger.error('Error occurred:', error)
     
     let errorMessage = userMessage || 'エラーが発生しました'
     

@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Camera, Upload, X, Loader2 } from 'lucide-react'
 import { scanReceipt } from '@/lib/ocr/receipt-scanner'
 import type { ExtractedReceiptData } from '@/lib/ocr/receipt-scanner'
+import { logger } from '@/lib/utils/logger'
 
 interface OcrScannerProps {
   onScanComplete: (data: ExtractedReceiptData) => void
@@ -35,7 +36,7 @@ export function OcrScanner({ onScanComplete, onClose }: OcrScannerProps) {
       const result = await scanReceipt(file)
       setScanResult(result)
     } catch (error) {
-      console.error('OCR Error:', error)
+      logger.error('OCR Error:', error)
       alert('レシートの読み取りに失敗しました')
     } finally {
       setIsScanning(false)

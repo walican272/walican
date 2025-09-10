@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Users, Plus, ArrowLeft, Calendar, Settings } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { logger } from '@/lib/utils/logger'
 
 interface Group {
   id: string
@@ -61,7 +62,7 @@ export default function GroupsPage() {
 
       setGroups(groupsWithCounts)
     } catch (error) {
-      console.error('Error loading groups:', error)
+      logger.error('Error loading groups:', error)
     } finally {
       setIsLoading(false)
     }

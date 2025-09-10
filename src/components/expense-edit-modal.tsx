@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { expenseApi } from '@/lib/supabase/api/expenses'
 import { participantApi } from '@/lib/supabase/api/participants'
 import type { Expense, Participant, ExpenseCategory } from '@/types'
+import { logger } from '@/lib/utils/logger'
 
 interface ExpenseEditModalProps {
   expense: Expense | null
@@ -58,7 +59,7 @@ export function ExpenseEditModal({ expense, isOpen, onClose, onSuccess, eventId 
       const data = await participantApi.getByEventId(eventId)
       setParticipants(data)
     } catch (error) {
-      console.error('Error loading participants:', error)
+      logger.error('Error loading participants:', error)
     }
   }
 

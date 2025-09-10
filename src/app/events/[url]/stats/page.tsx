@@ -19,6 +19,7 @@ import {
 import { format, parseISO, startOfDay, endOfDay } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import type { Event, Participant, Expense } from '@/types'
+import { logger } from '@/lib/utils/logger'
 
 export default function StatsPage() {
   const params = useParams()
@@ -56,7 +57,7 @@ export default function StatsPage() {
       setParticipants(participantsData)
       setExpenses(expensesData)
     } catch (error) {
-      console.error('Error loading data:', error)
+      logger.error('Error loading data:', error)
     } finally {
       setIsLoading(false)
     }

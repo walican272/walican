@@ -29,6 +29,7 @@ import { createClient } from '@/lib/supabase/client'
 import { participantApi } from '@/lib/supabase/api/participants'
 import { expenseApi } from '@/lib/supabase/api/expenses'
 import type { Event, Participant, Expense } from '@/types'
+import { logger } from '@/lib/utils/logger'
 
 export default function EventSettingsPage() {
   const params = useParams()
@@ -84,7 +85,7 @@ export default function EventSettingsPage() {
       setParticipants(participantsData)
       setExpenses(expensesData)
     } catch (error) {
-      console.error('Error loading event data:', error)
+      logger.error('Error loading event data:', error)
     } finally {
       setIsLoading(false)
     }
@@ -117,7 +118,7 @@ export default function EventSettingsPage() {
       })
       setIsEditing(false)
     } catch (error) {
-      console.error('Error updating event:', error)
+      logger.error('Error updating event:', error)
     }
   }
 
@@ -128,7 +129,7 @@ export default function EventSettingsPage() {
       await participantApi.delete(participantId)
       setParticipants(participants.filter(p => p.id !== participantId))
     } catch (error) {
-      console.error('Error deleting participant:', error)
+      logger.error('Error deleting participant:', error)
     }
   }
 
@@ -146,7 +147,7 @@ export default function EventSettingsPage() {
       
       router.push('/')
     } catch (error) {
-      console.error('Error deleting event:', error)
+      logger.error('Error deleting event:', error)
     }
   }
 

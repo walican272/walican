@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
+import { logger } from '@/lib/utils/logger'
 
 export interface UserProfile {
   id: string
@@ -35,7 +36,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
     
     return null
   } catch (error) {
-    console.error('Error fetching user profile:', error)
+    logger.error('Error fetching user profile:', error)
     return null
   }
 }
@@ -61,7 +62,7 @@ export async function getCurrentUserDisplayName(): Promise<string> {
     
     return displayName
   } catch (error) {
-    console.error('Error getting display name:', error)
+    logger.error('Error getting display name:', error)
     return '名無しさん'
   }
 }

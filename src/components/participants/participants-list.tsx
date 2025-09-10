@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { logger } from '@/lib/utils/logger'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -80,7 +81,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
       })
       setBalances(balanceMap)
     } catch (error) {
-      console.error('Error loading participants:', error)
+      logger.error('Error loading participants:', error)
       toast.error('参加者の読み込みに失敗しました')
     } finally {
       setIsLoading(false)
@@ -109,7 +110,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
       setNewParticipantName('')
       await loadParticipants()
     } catch (error) {
-      console.error('Error adding participant:', error)
+      logger.error('Error adding participant:', error)
       toast.error('参加者の追加に失敗しました')
     } finally {
       setIsAdding(false)

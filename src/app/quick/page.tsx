@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { logger } from '@/lib/utils/logger'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -81,7 +82,7 @@ export default function QuickCreatePage() {
         .single()
 
       if (eventError) {
-        console.error('Event creation error:', eventError)
+        logger.error('Event creation error:', eventError)
         throw eventError
       }
 
@@ -99,7 +100,7 @@ export default function QuickCreatePage() {
         .insert(participants)
 
       if (participantsError) {
-        console.error('Participants creation error:', participantsError)
+        logger.error('Participants creation error:', participantsError)
         throw participantsError
       }
 
@@ -112,7 +113,7 @@ export default function QuickCreatePage() {
       
       toast.success('イベントを作成しました！')
     } catch (error) {
-      console.error('Error creating event:', error)
+      logger.error('Error creating event:', error)
       toast.error('イベントの作成に失敗しました')
       setState(prev => ({ ...prev, isCreating: false }))
     }

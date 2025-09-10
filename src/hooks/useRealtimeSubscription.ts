@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { logger } from '@/lib/utils/logger'
 
 interface UseRealtimeSubscriptionProps {
   eventId: string | null
@@ -31,7 +32,7 @@ export function useRealtimeSubscription({ eventId, onUpdate }: UseRealtimeSubscr
           filter: `event_id=eq.${eventId}`,
         },
         () => {
-          // console.logを削除（本番環境での情報漏洩防止）
+          logger.debug('Participant realtime update triggered')
           onUpdateRef.current()
         }
       )

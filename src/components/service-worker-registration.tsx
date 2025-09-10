@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { logger } from '@/lib/utils/logger'
 
 export function ServiceWorkerRegistration() {
   useEffect(() => {
@@ -10,7 +11,7 @@ export function ServiceWorkerRegistration() {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
           registrations.forEach(registration => {
             registration.unregister()
-            console.log('Service Worker unregistered in development')
+            logger.log('Service Worker unregistered in development')
           })
         })
         return
@@ -21,7 +22,7 @@ export function ServiceWorkerRegistration() {
         navigator.serviceWorker
           .register('/service-worker.js')
           .then((registration) => {
-            console.log('Service Worker registered:', registration)
+            logger.log('Service Worker registered:', registration)
             
             // 更新があれば即座に適用
             if (registration.waiting) {
@@ -33,14 +34,14 @@ export function ServiceWorkerRegistration() {
               if (newWorker) {
                 newWorker.addEventListener('statechange', () => {
                   if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    console.log('New service worker available')
+                    logger.log('New service worker available')
                   }
                 })
               }
             })
           })
           .catch((error) => {
-            console.log('Service Worker registration failed:', error)
+            logger.error('Service Worker registration failed:', error)
           })
       })
     }

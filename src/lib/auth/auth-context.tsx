@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
+import { logger } from '@/lib/utils/logger'
 import { createClient } from '@/lib/supabase/client'
 import { User, Session } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
@@ -32,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session)
         setUser(session?.user ?? null)
       } catch (error) {
-        console.error('Auth initialization error:', error)
+        logger.error('Auth initialization error:', error)
       } finally {
         setLoading(false)
       }
@@ -97,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(null)
       router.push('/')
     } catch (error) {
-      console.error('Sign out error:', error)
+      logger.error('Sign out error:', error)
     }
   }
 
@@ -109,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
     } catch (error) {
-      console.error('Session refresh error:', error)
+      logger.error('Session refresh error:', error)
     }
   }
 

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { logger } from '@/lib/utils/logger'
 
 // セッションの有効期限（ミリ秒）
 const SESSION_DURATION = 60 * 60 * 1000 // 1時間
@@ -15,7 +16,7 @@ export async function middleware(request: NextRequest) {
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     
     if (sessionError) {
-      console.error('Session error:', sessionError)
+      logger.error('Session error:', sessionError)
       // セッションエラーの場合、クッキーをクリアしてリダイレクト
       const response = NextResponse.redirect(new URL('/auth/login', request.url))
       response.cookies.delete('sb-auth-token')
@@ -32,7 +33,7 @@ export async function middleware(request: NextRequest) {
         
         // セッションが期限切れの場合
         if (timeUntilExpiry <= 0) {
-          console.log('Session expired, redirecting to login')
+          logger.info('Session expired, redirecting to login')
           const response = NextResponse.redirect(new URL('/auth/login', request.url))
           response.cookies.delete('sb-auth-token')
           return response
@@ -40,11 +41,11 @@ export async function middleware(request: NextRequest) {
         
         // セッションの有効期限が15分以内の場合、リフレッシュを試みる
         if (timeUntilExpiry <= SESSION_REFRESH_THRESHOLD) {
-          console.log('Refreshing session...')
+          logger.info('Refreshing session...')
           const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
           
           if (refreshError) {
-            console.error('Failed to refresh session:', refreshError)
+            logger.error('Failed to refresh session:', refreshError)
             // リフレッシュに失敗した場合、ユーザーに再ログインを促す
             const response = NextResponse.redirect(new URL('/auth/login', request.url))
             response.cookies.delete('sb-auth-token')
@@ -52,7 +53,7 @@ export async function middleware(request: NextRequest) {
           }
           
           if (refreshData.session) {
-            console.log('Session refreshed successfully')
+            logger.info('Session refreshed successfully')
             // 新しいセッショントークンをクッキーに設定
             const response = NextResponse.next()
             response.cookies.set('sb-auth-token', refreshData.session.access_token, {
@@ -103,7 +104,7 @@ export async function middleware(request: NextRequest) {
     return response
     
   } catch (error) {
-    console.error('Middleware error:', error)
+    logger.error('Middleware error:', error)
     // エラーが発生した場合は通常のフローを続行
     return NextResponse.next()
   }

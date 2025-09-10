@@ -1,4 +1,5 @@
 import Tesseract from 'tesseract.js'
+import { logger } from '@/lib/utils/logger'
 
 export interface ExtractedReceiptData {
   totalAmount?: number
@@ -25,12 +26,12 @@ export async function scanReceipt(imageFile: File): Promise<ExtractedReceiptData
     )
     
     const text = result.data.text
-    // console.log('OCR Result:', text) // 本番環境では無効化
+    logger.log('OCR Result:', text)
     
     // テキストから情報を抽出
     return extractReceiptInfo(text)
   } catch (error) {
-    console.error('OCR Error:', error)
+    logger.error('OCR Error:', error)
     throw new Error('レシートの読み取りに失敗しました')
   }
 }

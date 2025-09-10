@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { logger } from '@/lib/utils/logger'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -96,7 +97,7 @@ export default function SettingsPage() {
         }
       }
     } catch (error) {
-      console.error('Error loading settings:', error)
+      logger.error('Error loading settings:', error)
     } finally {
       setLoading(false)
     }
@@ -137,7 +138,7 @@ export default function SettingsPage() {
       toast.success('プロフィールを保存しました')
       setPayPayLinkError(null)
     } catch (error) {
-      console.error('Error saving profile:', error)
+      logger.error('Error saving profile:', error)
       toast.error('プロフィールの保存に失敗しました')
     } finally {
       setSaving(false)

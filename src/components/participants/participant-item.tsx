@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { logger } from '@/lib/utils/logger'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -69,7 +70,7 @@ export const ParticipantItem: React.FC<ParticipantItemProps> = ({
       setIsEditing(false)
       onUpdate?.()
     } catch (error) {
-      console.error('Error updating participant name:', error)
+      logger.error('Error updating participant name:', error)
       toast.error('名前の更新に失敗しました')
       setNewName(participant.name)
     } finally {
@@ -124,7 +125,7 @@ export const ParticipantItem: React.FC<ParticipantItemProps> = ({
       toast.success(`「${displayName}」として登録しました`)
       onUpdate?.()
     } catch (error) {
-      console.error('Error claiming participant:', error)
+      logger.error('Error claiming participant:', error)
       toast.error('登録に失敗しました')
     } finally {
       setIsUpdating(false)

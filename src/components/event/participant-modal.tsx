@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { X, UserPlus } from 'lucide-react'
 import { participantApi } from '@/lib/supabase/api/participants'
+import { logger } from '@/lib/utils/logger'
 
 interface ParticipantModalProps {
   eventId: string
@@ -35,7 +36,7 @@ export function ParticipantModal({ eventId, isOpen, onClose, onSuccess }: Partic
       onSuccess()
       onClose()
     } catch (err) {
-      console.error('Error adding participant:', err)
+      logger.error('Error adding participant:', err)
       setError('参加者の追加に失敗しました')
     } finally {
       setIsLoading(false)

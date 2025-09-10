@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { logger } from '@/lib/utils/logger'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -74,7 +75,7 @@ export function ExpenseCreateModal({
         setPaidBy(data[0].id)
       }
     } catch (error) {
-      console.error('Error loading participants:', error)
+      logger.error('Error loading participants:', error)
       toast.error('参加者の読み込みに失敗しました')
     } finally {
       setIsLoading(false)
@@ -165,7 +166,7 @@ export function ExpenseCreateModal({
       onSuccess()
       handleClose()
     } catch (error) {
-      console.error('Error creating expense:', error)
+      logger.error('Error creating expense:', error)
       toast.error('支払いの記録に失敗しました')
     } finally {
       setIsSaving(false)
